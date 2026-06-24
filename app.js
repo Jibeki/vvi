@@ -17,7 +17,7 @@ function renderPage() {
     .map(({ title, url }) => {
       const safeTitle = escapeHtml(title);
       const safeUrl = escapeHtml(url);
-      return `<li><h2>${safeTitle}</h2><video controls preload="metadata" width="480" src="${safeUrl}"></video></li>`;
+      return `<li><h2>${safeTitle}</h2><video controls preload="metadata" width="480" src="${safeUrl}" aria-label="Video player for ${safeTitle}"></video></li>`;
     })
     .join('');
 
@@ -30,8 +30,10 @@ function renderPage() {
   <body>
     <h1>VVI Video Hosting</h1>
     <form method="post" action="/videos">
-      <label>Title <input name="title" required /></label>
-      <label>Video URL <input name="url" type="url" required /></label>
+      <label for="title">Title</label>
+      <input id="title" name="title" required />
+      <label for="url">Video URL</label>
+      <input id="url" name="url" type="url" required />
       <button type="submit">Add video</button>
     </form>
     <ul>${items}</ul>
