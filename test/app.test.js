@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { createServer, videos } = require('../app');
+const { createServer, videos, resetVideos } = require('../app');
 
 function request(port, options = {}, body) {
   return new Promise((resolve, reject) => {
@@ -28,8 +28,11 @@ function request(port, options = {}, body) {
   });
 }
 
+test.beforeEach(() => {
+  resetVideos();
+});
+
 test('GET / renders video hosting page', async (t) => {
-  videos.length = 0;
   const server = createServer();
   await new Promise((resolve) => server.listen(0, resolve));
   t.after(() => server.close());
@@ -42,7 +45,6 @@ test('GET / renders video hosting page', async (t) => {
 });
 
 test('POST /videos stores a valid video URL', async (t) => {
-  videos.length = 0;
   const server = createServer();
   await new Promise((resolve) => server.listen(0, resolve));
   t.after(() => server.close());
@@ -67,7 +69,6 @@ test('POST /videos stores a valid video URL', async (t) => {
 });
 
 test('POST /videos rejects invalid URL protocols', async (t) => {
-  videos.length = 0;
   const server = createServer();
   await new Promise((resolve) => server.listen(0, resolve));
   t.after(() => server.close());
@@ -88,7 +89,6 @@ test('POST /videos rejects invalid URL protocols', async (t) => {
 });
 
 test('POST /videos rejects repeated form values', async (t) => {
-  videos.length = 0;
   const server = createServer();
   await new Promise((resolve) => server.listen(0, resolve));
   t.after(() => server.close());

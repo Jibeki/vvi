@@ -1,6 +1,7 @@
 const http = require('node:http');
 
 const videos = [];
+const MAX_PAYLOAD_SIZE = 1_000_000;
 
 function escapeHtml(value) {
   return value
@@ -73,7 +74,7 @@ function createServer() {
 
         const chunkSize = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
         bodySize += chunkSize;
-        if (bodySize > 1_000_000) {
+        if (bodySize > MAX_PAYLOAD_SIZE) {
           tooLarge = true;
           req.off('data', onData);
           req.off('end', onEnd);
@@ -125,4 +126,8 @@ function createServer() {
   });
 }
 
-module.exports = { createServer, videos };
+function resetVideos() {
+  videos.length = 0;
+}
+
+module.exports = { createServer, videos, resetVideos };
