@@ -86,3 +86,24 @@ test('POST /videos rejects invalid URL protocols', async (t) => {
   assert.equal(res.statusCode, 400);
   assert.equal(videos.length, 0);
 });
+
+test('POST /videos rejects repeated form values', async (t) => {
+  videos.length = 0;
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, resolve));
+  t.after(() => server.close());
+
+  const address = server.address();
+  const res = await request(
+    address.port,
+    {
+      path: '/videos',
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' }
+    },
+    'title=One&title=Two&url=https%3A%2F%2Fexample.com%2Fdemo.mp4'
+  );
+
+  assert.equal(res.statusCode, 400);
+  assert.equal(videos.length, 0);
+});

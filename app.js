@@ -64,16 +64,33 @@ function createServer() {
 
     if (req.method === 'POST' && req.url === '/videos') {
       let body = '';
+      let bodySize = 0;
+      let tooLarge = false;
 
       req.on('data', (chunk) => {
-        body += chunk;
-        if (body.length > 1_000_000) {
+        bodySize += chunk.length;
+        if (bodySize > 1_000_000) {
+          tooLarge = true;
+          res.writeHead(413, { 'content-type': 'text/plain; charset=utf-8' });
+          res.end('Payload too large');
           req.destroy();
+          return;
         }
+        body += chunk;
       });
 
       req.on('end', () => {
+        if (tooLarge) {
+          return;
+        }
+
         const { title = '', url = '' } = parse(body);
+        if (Array.isArray(title) || Array.isArray(url)) {
+          res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
+          res.end('Invalid title or video URL');
+          return;
+        }
+
         const normalizedTitle = String(title).trim();
         const normalizedUrl = String(url).trim();
 
