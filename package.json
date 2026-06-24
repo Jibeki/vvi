@@ -1,0 +1,25 @@
+{
+  "name": "vvi",
+  "version": "1.0.0",
+  "description": "Minimal video hosting web application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jibeki/vvi.git"
+  },
+  "keywords": [
+    "video",
+    "hosting",
+    "node"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jibeki/vvi/issues"
+  },
+  "homepage": "https://github.com/Jibeki/vvi#readme"
+}
