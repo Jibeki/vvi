@@ -62,31 +62,35 @@ function createServer() {
     }
 
     if (req.method === 'POST' && req.url === '/videos') {
-      let body = '';
+      const bodyChunks = [];
       let bodySize = 0;
       let tooLarge = false;
 
-      req.on('data', (chunk) => {
+      const onData = (chunk) => {
         if (tooLarge) {
           return;
         }
 
-        bodySize += chunk.length;
+        const chunkSize = Buffer.isBuffer(chunk) ? chunk.byteLength : Buffer.byteLength(chunk);
+        bodySize += chunkSize;
         if (bodySize > 1_000_000) {
           tooLarge = true;
+          req.off('data', onData);
+          req.off('end', onEnd);
           res.writeHead(413, { 'content-type': 'text/plain; charset=utf-8' });
           res.end('Payload too large');
           req.destroy();
           return;
         }
-        body += chunk;
-      });
+        bodyChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      };
 
-      req.on('end', () => {
+      const onEnd = () => {
         if (tooLarge) {
           return;
         }
 
+        const body = Buffer.concat(bodyChunks).toString('utf8');
         const params = new URLSearchParams(body);
         if (params.getAll('title').length !== 1 || params.getAll('url').length !== 1) {
           res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
@@ -108,7 +112,10 @@ function createServer() {
         videos.push({ title: normalizedTitle, url: normalizedUrl });
         res.writeHead(303, { location: '/' });
         res.end();
-      });
+      };
+
+      req.on('data', onData);
+      req.on('end', onEnd);
 
       return;
     }
