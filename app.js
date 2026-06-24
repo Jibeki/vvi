@@ -1,5 +1,4 @@
 const http = require('node:http');
-const { parse } = require('node:querystring');
 
 const videos = [];
 
@@ -68,6 +67,10 @@ function createServer() {
       let tooLarge = false;
 
       req.on('data', (chunk) => {
+        if (tooLarge) {
+          return;
+        }
+
         bodySize += chunk.length;
         if (bodySize > 1_000_000) {
           tooLarge = true;
@@ -84,13 +87,15 @@ function createServer() {
           return;
         }
 
-        const { title = '', url = '' } = parse(body);
-        if (Array.isArray(title) || Array.isArray(url)) {
+        const params = new URLSearchParams(body);
+        if (params.getAll('title').length !== 1 || params.getAll('url').length !== 1) {
           res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
           res.end('Invalid title or video URL');
           return;
         }
 
+        const title = params.get('title') || '';
+        const url = params.get('url') || '';
         const normalizedTitle = String(title).trim();
         const normalizedUrl = String(url).trim();
 
